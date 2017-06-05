@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
-apply plugin: 'realm-android'
 
 repositories {
+    mavenCentral()
     maven { url 'https://clojars.org/repo/' }
 }
 
@@ -42,17 +42,20 @@ android {
             keyPassword releaseKeystoreProperties['keyPassword']
         }
     }
+    flavorDimensions "environment"
     productFlavors {
         staging {
             buildConfigField "String", "HOSTNAME", "\"http://www.someURL.com\""
+            dimension "environment"
         }
         prod {
             buildConfigField "String", "HOSTNAME", "\"http://www.someURL.com\""
+            dimension "environment"
         }
     }
     buildTypes {
         debug {
-            applicationIdSuffix ".debug"
+//            applicationIdSuffix ".debug"
             versionNameSuffix '-debug'
             debuggable true
             signingConfig signingConfigs.debug
@@ -70,28 +73,36 @@ android {
     lintOptions {
         abortOnError false
     }
-    // Task to set a better APK name on "Generate APK"
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            def apkFilename = "ToDO-${variantData.variantConfiguration.baseName}-${variant.versionName}.apk"
-            output.outputFile = new File(output.outputFile.parentFile, apkFilename)
-        }
-    }
+//    // Task to set a better APK name on "Generate APK"
+//    applicationVariants.all { variant ->
+//        variant.outputs.each { output ->
+//            def apkFilename = "ToDO-${variantData.variantConfiguration.baseName}-${variant.versionName}.apk"
+//            output.outputFile = new File(output.outputFile.parentFile, apkFilename)
+//        }
+//    }
 }
 
 dependencies {
     // Support libs
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:cardview-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
 
     // Networking
-    compile 'com.squareup.retrofit2:retrofit:2.2.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.2.0'
-    compile 'com.squareup.okhttp3:okhttp:3.7.0'
+    compile 'com.squareup.retrofit2:retrofit:2.3.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
+//    compile 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
     compile 'com.google.code.gson:gson:2.8.0'
+
+    // Google
+    compile 'com.google.android.gms:play-services-auth:10.2.6'
+
+    // Firebase
+    compile 'com.google.firebase:firebase-analytics:10.2.6'
+    compile 'com.google.firebase:firebase-auth:10.2.6'
+    compile 'com.google.firebase:firebase-crash:10.2.6'
 
     // Calligraphy - Fonts
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
@@ -113,8 +124,8 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.10'
 
     // RxJava / RxAndroid
-    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    compile 'io.reactivex.rxjava2:rxjava:2.0.1'
+//    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+//    compile 'io.reactivex.rxjava2:rxjava:2.1.0'
 
     // Dev libs
     compile 'com.jakewharton.timber:timber:4.5.1'
@@ -122,9 +133,6 @@ dependencies {
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-    debugCompile 'com.facebook.stetho:stetho:1.4.2'
-    debugCompile 'com.facebook.stetho:stetho-okhttp3:1.4.2'
-    debugCompile 'com.robotpajamas.stetho:stetho-couchbase:0.2.0'
 
     // Tests
     testCompile 'junit:junit:4.12'
@@ -136,3 +144,5 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 }
+
+apply plugin: 'com.google.gms.google-services'
