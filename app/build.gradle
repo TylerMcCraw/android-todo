@@ -55,7 +55,6 @@ android {
     }
     buildTypes {
         debug {
-//            applicationIdSuffix ".debug"
             versionNameSuffix '-debug'
             debuggable true
             signingConfig signingConfigs.debug
@@ -73,13 +72,6 @@ android {
     lintOptions {
         abortOnError false
     }
-//    // Task to set a better APK name on "Generate APK"
-//    applicationVariants.all { variant ->
-//        variant.outputs.each { output ->
-//            def apkFilename = "ToDO-${variantData.variantConfiguration.baseName}-${variant.versionName}.apk"
-//            output.outputFile = new File(output.outputFile.parentFile, apkFilename)
-//        }
-//    }
 }
 
 dependencies {
@@ -93,7 +85,6 @@ dependencies {
     // Networking
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
-//    compile 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
     compile 'com.google.code.gson:gson:2.8.0'
 
     // Google
@@ -122,10 +113,6 @@ dependencies {
     // Dependency Injection
     compile 'com.google.dagger:dagger:2.10'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.10'
-
-    // RxJava / RxAndroid
-//    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
-//    compile 'io.reactivex.rxjava2:rxjava:2.1.0'
 
     // Dev libs
     compile 'com.jakewharton.timber:timber:4.5.1'

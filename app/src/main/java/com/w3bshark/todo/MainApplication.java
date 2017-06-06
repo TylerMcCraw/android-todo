@@ -64,23 +64,19 @@ public class MainApplication extends Application {
         ApplicationModule applicationModule = new ApplicationModule(this);
         FirebaseModule firebaseModule = new FirebaseModule();
         GoogleApiModule googleApiModule = new GoogleApiModule();
-        SessionLocalSourceModule sessionLocalSourceModule = new SessionLocalSourceModule();
-        GsonModule gsonModule = new GsonModule();
 
         authComponent = DaggerIAuthComponent.builder()
                 .firebaseModule(firebaseModule)
                 .googleApiModule(googleApiModule)
                 .applicationModule(applicationModule)
-                .gsonModule(gsonModule)
                 .build();
 
         sessionComponent = DaggerISessionComponent.builder()
                 .firebaseModule(firebaseModule)
                 .googleApiModule(googleApiModule)
                 .applicationModule(applicationModule)
-                .sessionLocalSourceModule(sessionLocalSourceModule)
                 .networkModule(new NetworkModule(BuildConfig.HOSTNAME))
-                .gsonModule(gsonModule)
+                .gsonModule(new GsonModule())
                 .build();
     }
 
