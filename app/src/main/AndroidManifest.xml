@@ -23,6 +23,22 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".tasklist.TaskListActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:host="todo.w3bshark.com"
+                    android:pathPrefix="/message"
+                    android:scheme="http"/>
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".signin.SignInActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"/>
