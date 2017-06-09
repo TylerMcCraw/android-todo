@@ -2,10 +2,10 @@ package com.w3bshark.todo.data.source;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
-import com.w3bshark.todo.ApplicationModule;
 import com.w3bshark.todo.data.source.local.GsonModule;
 import com.w3bshark.todo.data.source.remote.FirebaseModule;
 import com.w3bshark.todo.data.source.remote.GoogleApiModule;
+import com.w3bshark.todo.util.ApplicationModule;
 
 import javax.inject.Singleton;
 
