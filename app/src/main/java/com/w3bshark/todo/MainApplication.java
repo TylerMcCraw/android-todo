@@ -2,15 +2,18 @@ package com.w3bshark.todo;
 
 import android.app.Application;
 
+import com.facebook.stetho.Stetho;
 import com.squareup.leakcanary.LeakCanary;
 import com.w3bshark.todo.data.source.DaggerIAuthComponent;
 import com.w3bshark.todo.data.source.DaggerISessionComponent;
 import com.w3bshark.todo.data.source.IAuthComponent;
 import com.w3bshark.todo.data.source.ISessionComponent;
 import com.w3bshark.todo.data.source.local.GsonModule;
+import com.w3bshark.todo.data.source.local.ToDoSQLiteDbModule;
 import com.w3bshark.todo.data.source.remote.FirebaseModule;
 import com.w3bshark.todo.data.source.remote.GoogleApiModule;
 import com.w3bshark.todo.data.source.remote.NetworkModule;
+import com.w3bshark.todo.util.ApplicationModule;
 import com.w3bshark.todo.util.FirebaseCrashReportingTree;
 
 import timber.log.Timber;
@@ -46,6 +49,8 @@ public class MainApplication extends Application {
         Timber.plant(new FirebaseCrashReportingTree());
 
         LeakCanary.install(this);
+
+        Stetho.initializeWithDefaults(this);
     }
 
     /**
@@ -76,6 +81,7 @@ public class MainApplication extends Application {
                 .googleApiModule(googleApiModule)
                 .applicationModule(applicationModule)
                 .networkModule(new NetworkModule(BuildConfig.HOSTNAME))
+                .toDoSQLiteDbModule(new ToDoSQLiteDbModule())
                 .gsonModule(new GsonModule())
                 .build();
     }

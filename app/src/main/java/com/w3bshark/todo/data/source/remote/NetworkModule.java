@@ -1,5 +1,6 @@
 package com.w3bshark.todo.data.source.remote;
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.Gson;
 
 import java.util.concurrent.TimeUnit;
@@ -48,6 +49,7 @@ public class NetworkModule {
                 .readTimeout(CONNECTION_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .writeTimeout(CONNECTION_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .addInterceptor(loggingInterceptor)
+                .addNetworkInterceptor(new StethoInterceptor())
                 .build();
     }
 
