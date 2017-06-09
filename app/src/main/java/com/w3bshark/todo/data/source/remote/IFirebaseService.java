@@ -28,6 +28,12 @@ interface IFirebaseService {
             @Query("equalTo") String userId
     );
 
+    @GET("/v1/tasks.json?orderBy=\"id\"")
+    Call<Task> getTask(
+            @Query("auth") String authToken,
+            @Query("equalTo") String taskId
+    );
+
     @PUT("/v1/tasks.json")
     Call<String> addTask(
             @Query("auth") String authToken,

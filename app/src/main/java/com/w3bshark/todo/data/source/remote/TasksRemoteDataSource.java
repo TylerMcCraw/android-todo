@@ -1,10 +1,14 @@
 package com.w3bshark.todo.data.source.remote;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.w3bshark.todo.data.Task;
 import com.w3bshark.todo.data.source.ITasksDataSource;
+import com.w3bshark.todo.util.AppExecutors;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -29,36 +33,67 @@ public class TasksRemoteDataSource implements ITasksDataSource {
 
     private final IFirebaseService service;
 
+    private final AppExecutors appExecutors;
+
     @Inject
-    public TasksRemoteDataSource(Retrofit retrofit) {
+    public TasksRemoteDataSource(Retrofit retrofit, AppExecutors appExecutors) {
         service = retrofit.create(IFirebaseService.class);
+        this.appExecutors = appExecutors;
     }
 
     @Override
-    public void getTasks(@NonNull String authToken, @NonNull String userId, @NonNull LoadTasksCallback callback) {
-        Timber.d("remote getTasks: with user ID " + userId);
-        service.getTasks(authToken, "\"" + userId + "\"")
-                .enqueue(new Callback<Map<String, Task>>() {
-                    @Override
-                    public void onResponse(Call<Map<String, Task>> call, Response<Map<String, Task>> response) {
-                        if (response.isSuccessful()) {
-                            callback.onTasksLoaded(response.body());
-                        } else {
-                            Timber.d("remote getTasks: response unsuccessful");
-                            callback.onDataNotAvailable();
-                        }
-                    }
+    public void getTasks(@NonNull String userId, @NonNull LoadTasksCallback callback) {
+        appExecutors.networkIO().execute(() ->
+                service.getTasks(DEV_AUTH_TOKEN, "\"" + userId + "\"")
+                        .enqueue(new Callback<Map<String, Task>>() {
+                            @Override
+                            public void onResponse(@NonNull Call<Map<String, Task>> call, @NonNull Response<Map<String, Task>> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    Map<String, Task> taskMap = response.body();
+                                    List<Task> tasks = new ArrayList<>(taskMap.size());
+                                    tasks.addAll(taskMap.values());
+                                    callback.onTasksLoaded(tasks);
+                                } else {
+                                    Timber.d("remote getTasks: response unsuccessful");
+                                    callback.onDataNotAvailable();
+                                }
+                            }
 
-                    @Override
-                    public void onFailure(Call<Map<String, Task>> call, Throwable t) {
-                        Timber.e(t, "remote getTasks: request failed");
-                        callback.onDataNotAvailable();
-                    }
-                });
+                            @Override
+                            public void onFailure(Call<Map<String, Task>> call, Throwable t) {
+                                Timber.e(t, "remote getTasks: request failed");
+                                callback.onDataNotAvailable();
+                            }
+                        })
+        );
     }
 
     @Override
-    public void getTask(@NonNull String taskId, @NonNull GetTaskCallback callback) {
+    public void getTask(@NonNull String taskId, @NonNull LoadTaskCallback callback) {
+        appExecutors.networkIO().execute(() ->
+                service.getTask(DEV_AUTH_TOKEN, "\"" + taskId + "\"")
+                        .enqueue(new Callback<Task>() {
+                            @Override
+                            public void onResponse(Call<Task> call, Response<Task> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    callback.onTaskLoaded(response.body());
+                                } else {
+                                    Timber.d("remote getTasks: response unsuccessful");
+                                    callback.onDataNotAvailable();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<Task> call, Throwable t) {
+                                Timber.e(t, "remote getTasks: request failed");
+                                callback.onDataNotAvailable();
+                            }
+                        })
+        );
+    }
+
+    @Override
+    public void saveTasks(List<Task> tasks, @Nullable SaveTaskCallback callback) {
 
     }
 
