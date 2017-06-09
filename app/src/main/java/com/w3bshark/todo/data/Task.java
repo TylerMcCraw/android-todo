@@ -1,30 +1,50 @@
 package com.w3bshark.todo.data;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Index;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import com.google.gson.annotations.SerializedName;
+import com.w3bshark.todo.util.FireBasePushIdGenerator;
 
 /**
  * Created by Tyler McCraw on 5/26/17.
  * <p/>
- * Immutable Task data model
+ * Note: it would be great if we could
  */
 
+@Entity(indices = {@Index("id"), @Index("user")}, primaryKeys = {"id"})
 public final class Task implements ITask {
 
-    private final String user;
+    /* We can't make these all `final` or `private` due to current limitations of Room API */
+    @SerializedName("id")
+    public String id;
 
-    private final String title;
+    @SerializedName("user")
+    public final String user;
 
+    @SerializedName("title")
+    public final String title;
+
+    @SerializedName("description")
     @Nullable
-    private final String description;
+    public final String description;
 
-    private final boolean completed;
+    @SerializedName("completed")
+    public final boolean completed;
 
     public Task(@NonNull String user, String title, @Nullable String description, boolean completed) {
+        this.id = FireBasePushIdGenerator.generatePushId();
         this.user = user;
         this.title = title;
         this.description = description;
         this.completed = completed;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -36,4 +56,5 @@ public final class Task implements ITask {
     public boolean isCompleted() {
         return completed;
     }
+
 }

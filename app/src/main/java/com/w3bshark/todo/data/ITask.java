@@ -10,6 +10,8 @@ package com.w3bshark.todo.data;
 
 public interface ITask {
 
+    String getId();
+
     String getTitle();
 
     boolean isCompleted();
