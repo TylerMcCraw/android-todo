@@ -1,9 +1,7 @@
-package com.w3bshark.todo;
+package com.w3bshark.todo.util;
 
 import android.app.Application;
 import android.content.Context;
-
-import com.w3bshark.todo.util.ApplicationContext;
 
 import dagger.Module;
 import dagger.Provides;
