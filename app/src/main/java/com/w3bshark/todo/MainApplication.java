@@ -8,8 +8,8 @@ import com.w3bshark.todo.data.source.DaggerIAuthComponent;
 import com.w3bshark.todo.data.source.DaggerISessionComponent;
 import com.w3bshark.todo.data.source.IAuthComponent;
 import com.w3bshark.todo.data.source.ISessionComponent;
+import com.w3bshark.todo.data.source.local.DiskModule;
 import com.w3bshark.todo.data.source.local.GsonModule;
-import com.w3bshark.todo.data.source.local.ToDoSQLiteDbModule;
 import com.w3bshark.todo.data.source.remote.FirebaseModule;
 import com.w3bshark.todo.data.source.remote.GoogleApiModule;
 import com.w3bshark.todo.data.source.remote.NetworkModule;
@@ -81,7 +81,7 @@ public class MainApplication extends Application {
                 .googleApiModule(googleApiModule)
                 .applicationModule(applicationModule)
                 .networkModule(new NetworkModule(BuildConfig.HOSTNAME))
-                .toDoSQLiteDbModule(new ToDoSQLiteDbModule())
+                .diskModule(new DiskModule())
                 .gsonModule(new GsonModule())
                 .build();
     }
