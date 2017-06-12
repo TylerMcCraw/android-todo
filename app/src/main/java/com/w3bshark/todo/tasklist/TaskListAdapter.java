@@ -24,9 +24,17 @@ import butterknife.ButterKnife;
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskViewHolder> {
 
     private List<? extends ITask> tasks;
+    private final TaskListListener listener;
 
-    TaskListAdapter(List<ITask> tasks) {
+    interface TaskListListener {
+        void onTaskClicked(ITask task, View viewClicked);
+        void onCompleteTaskClick(ITask task, View viewClicked);
+        void onActivateTaskClick(ITask task, View viewClicked);
+    }
+
+    TaskListAdapter(List<? extends ITask> tasks, TaskListListener listener) {
         this.tasks = tasks;
+        this.listener = listener;
     }
 
     @Override
@@ -36,7 +44,22 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskVi
 
     @Override
     public void onBindViewHolder(TaskViewHolder taskViewHolder, int i) {
-        taskViewHolder.bindTask(tasks.get(i));
+        taskViewHolder.bindTask(tasks.get(taskViewHolder.getAdapterPosition()));
+        taskViewHolder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onTaskClicked(tasks.get(taskViewHolder.getAdapterPosition()), v);
+            }
+        });
+        taskViewHolder.completeCheckBox.setOnClickListener(v -> {
+            if (listener != null) {
+                final ITask task = tasks.get(taskViewHolder.getAdapterPosition());
+                if (task.isCompleted()) {
+                    listener.onActivateTaskClick(task, v);
+                } else {
+                    listener.onCompleteTaskClick(task, v);
+                }
+            }
+        });
     }
 
     @Override

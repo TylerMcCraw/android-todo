@@ -24,9 +24,9 @@ public interface ITaskListContract {
 
         void showTasks(List<? extends ITask> tasks);
 
-        void showAddTask();
+        void goToAddTaskScreen();
 
-        void showTaskDetailsUi(String taskId);
+        void goToEditTaskScreen(String taskId);
 
         void showLoadingTasksError();
 
@@ -39,7 +39,7 @@ public interface ITaskListContract {
 
         void addNewTask();
 
-        void openTaskDetails(@NonNull ITask requestedTask);
+        void openEditTask(@NonNull ITask requestedTask);
 
         void completeTask(@NonNull ITask task);
 
