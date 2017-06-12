@@ -6,9 +6,11 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
 import retrofit2.http.PUT;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -34,18 +36,23 @@ interface IFirebaseService {
             @Query("equalTo") String taskId
     );
 
-    @PUT("/v1/tasks.json")
-    Call<String> addTask(
+    @PUT("/v1/tasks/{id}.json")
+    Call<Task> createUpdateTask(
+            @Path("id") String taskId,
             @Query("auth") String authToken,
-            @Query("equalTo") String userId,
             @Body Task task
     );
 
-    @PATCH("/v1/tasks.json")
-    Call<String> updateTask(
+    @PATCH("/v1/tasks/{id}.json")
+    Call<Map<String, String>> markTaskCompletion(
+            @Path("id") String taskId,
             @Query("auth") String authToken,
-            @Query("equalTo") String userId,
-            @Query("task_id") String taskId,
-            @Body Task task
+            @Body Map<String, Boolean> completedMap
+    );
+
+    @DELETE("/v1/tasks/{id}.json")
+    Call<Map<String, String>> deleteTask(
+            @Path("id") String taskId,
+            @Query("auth") String authToken
     );
 }
