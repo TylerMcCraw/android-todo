@@ -60,14 +60,38 @@ public class TasksLocalDataSource implements ITasksDataSource {
         appExecutors.diskIO().execute(() -> {
             taskDao.insertTasks(tasks);
             if (callback != null) {
-                callback.onTasksSaved();
+                callback.onTaskSaved();
             }
         });
     }
 
     @Override
-    public void saveTask(@NonNull Task task, @NonNull SaveTaskCallback callback) {
-        taskDao.insertTask(task);
-        callback.onTasksSaved();
+    public void saveTask(@NonNull Task task) {
+        appExecutors.diskIO().execute(() -> taskDao.insertTask(task));
+    }
+
+    @Override
+    public void completeTask(@NonNull Task task) {
+        appExecutors.diskIO().execute(() -> taskDao.updateTask(task));
+    }
+
+    @Override
+    public void activateTask(@NonNull Task task) {
+        appExecutors.diskIO().execute(() -> taskDao.updateTask(task));
+    }
+
+    @Override
+    public void refreshTasks() {
+        // N/A
+    }
+
+    @Override
+    public void deleteAllTasks(@NonNull String userId) {
+        appExecutors.diskIO().execute(() -> taskDao.deleteAllTasks(userId));
+    }
+
+    @Override
+    public void deleteTask(@NonNull String taskId) {
+        appExecutors.diskIO().execute(() -> taskDao.deleteTask(taskId));
     }
 }

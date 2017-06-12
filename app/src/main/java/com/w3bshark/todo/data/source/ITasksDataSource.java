@@ -26,14 +26,14 @@ public interface ITasksDataSource {
 
     interface LoadTaskCallback {
 
-        void onTaskLoaded(Task task);
+        void onTaskLoaded(ITask task);
 
         void onDataNotAvailable();
     }
 
     interface SaveTaskCallback {
 
-        void onTasksSaved();
+        void onTaskSaved();
 
         void onSaveTaskFailed();
     }
@@ -42,8 +42,20 @@ public interface ITasksDataSource {
 
     void getTask(@NonNull String taskId, @NonNull LoadTaskCallback callback);
 
-    void saveTask(@NonNull Task task, @NonNull SaveTaskCallback callback);
+    // TODO add callbacks for remainder of functions
+
+    void saveTask(@NonNull Task task);
 
     void saveTasks(List<Task> tasks, @Nullable SaveTaskCallback callback);
+
+    void completeTask(@NonNull Task task);
+
+    void activateTask(@NonNull Task task);
+
+    void refreshTasks();
+
+    void deleteAllTasks(@NonNull String userId);
+
+    void deleteTask(@NonNull String taskId);
 
 }

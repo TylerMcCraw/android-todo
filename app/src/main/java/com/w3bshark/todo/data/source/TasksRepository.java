@@ -34,12 +34,12 @@ public class TasksRepository implements ITasksDataSource {
 
     private final AppExecutors appExecutors;
 
-    private Map<String, ITask> mCachedTasks;
+    private Map<String, ITask> cachedTasks;
 
     /**
      * Marks the cache as invalid, to force an update the next time data is requested.
      */
-    private boolean mCacheIsDirty = false;
+    private boolean cacheIsDirty = false;
 
     /**
      * By marking the constructor with {@code @Inject}, Dagger will try to inject the dependencies
@@ -63,47 +63,116 @@ public class TasksRepository implements ITasksDataSource {
     public void getTasks(@NonNull String userId, @NonNull LoadTasksCallback callback) {
         checkNotNull(callback);
 
-        // Respond immediately with cache if available and not dirty
-        if (mCachedTasks != null && !mCacheIsDirty) {
-            appExecutors.mainThread().execute(() -> callback.onTasksLoaded(new ArrayList<>(mCachedTasks.values())));
-            return;
-        }
+        if (!cacheIsDirty) {
+            if (!getCachedTasks().isEmpty()) {
+                // Respond immediately with cache if available and not dirty
+                appExecutors.mainThread().execute(() -> callback.onTasksLoaded(new ArrayList<>(getCachedTasks().values())));
+            } else {
+                // Query the local storage if available. If not, query the network.
+                tasksLocalDataSource.getTasks(userId, new LoadTasksCallback() {
+                    @Override
+                    public void onTasksLoaded(List<? extends ITask> tasks) {
+                        refreshCache(tasks);
+                        appExecutors.mainThread().execute(() -> callback.onTasksLoaded(new ArrayList<>(getCachedTasks().values())));
+                    }
 
-        if (mCacheIsDirty) {
+                    @Override
+                    public void onDataNotAvailable() {
+                        getTasksFromRemoteDataSource(userId, callback);
+                    }
+                });
+            }
+        } else {
             // If the cache is dirty we need to fetch new data from the network.
             getTasksFromRemoteDataSource(userId, callback);
-        } else {
-            // Query the local storage if available. If not, query the network.
-            tasksLocalDataSource.getTasks(userId, new LoadTasksCallback() {
-                @Override
-                public void onTasksLoaded(List<? extends ITask> tasks) {
-                    refreshCache(tasks);
-                    appExecutors.mainThread().execute(() -> callback.onTasksLoaded(new ArrayList<>(mCachedTasks.values())));
-                }
-
-                @Override
-                public void onDataNotAvailable() {
-                    getTasksFromRemoteDataSource(userId, callback);
-                }
-            });
         }
-
-        getTasksFromRemoteDataSource(userId, callback);
     }
 
     @Override
     public void getTask(@NonNull String taskId, @NonNull LoadTaskCallback callback) {
+        checkNotNull(taskId);
+        checkNotNull(callback);
 
+        ITask cachedTask = getCachedTasks().get(taskId);
+        if (cachedTask != null) {
+            callback.onTaskLoaded(cachedTask);
+            return;
+        }
+
+        tasksLocalDataSource.getTask(taskId, new LoadTaskCallback() {
+            @Override
+            public void onTaskLoaded(ITask task) {
+                appExecutors.mainThread().execute(() -> callback.onTaskLoaded(task));
+            }
+
+            @Override
+            public void onDataNotAvailable() {
+                tasksRemoteDataSource.getTask(taskId, new LoadTaskCallback() {
+                    @Override
+                    public void onTaskLoaded(ITask task) {
+                        appExecutors.mainThread().execute(() -> callback.onTaskLoaded(task));
+                    }
+
+                    @Override
+                    public void onDataNotAvailable() {
+                        appExecutors.mainThread().execute(callback::onDataNotAvailable);
+                    }
+                });
+            }
+        });
     }
 
     @Override
-    public void saveTask(@NonNull Task task, @NonNull SaveTaskCallback callback) {
-
+    public void saveTask(@NonNull Task task) {
+        checkNotNull(task);
+        tasksRemoteDataSource.saveTask(task);
+        tasksLocalDataSource.saveTask(task);
+        getCachedTasks().put(task.getId(), task);
     }
 
     @Override
     public void saveTasks(List<Task> tasks, @Nullable SaveTaskCallback callback) {
+        tasksRemoteDataSource.saveTasks(tasks, null);
+        tasksLocalDataSource.saveTasks(tasks, null);
+        for (Task task : tasks) {
+            getCachedTasks().put(task.getId(), task);
+        }
+    }
 
+    @Override
+    public void completeTask(@NonNull Task task) {
+        checkNotNull(task);
+        tasksRemoteDataSource.completeTask(task);
+        tasksLocalDataSource.completeTask(task);
+        getCachedTasks().put(task.getId(), task);
+    }
+
+    @Override
+    public void activateTask(@NonNull Task task) {
+        checkNotNull(task);
+        tasksRemoteDataSource.activateTask(task);
+        tasksLocalDataSource.activateTask(task);
+        getCachedTasks().put(task.getId(), task);
+    }
+
+    @Override
+    public void refreshTasks() {
+        cacheIsDirty = true;
+    }
+
+    @Override
+    public void deleteAllTasks(@NonNull String userId) {
+        tasksRemoteDataSource.deleteAllTasks(userId);
+        tasksLocalDataSource.deleteAllTasks(userId);
+        getCachedTasks().clear();
+    }
+
+    @Override
+    public void deleteTask(@NonNull String taskId) {
+        checkNotNull(taskId);
+        tasksRemoteDataSource.deleteTask(taskId);
+        tasksLocalDataSource.deleteTask(taskId);
+        getCachedTasks().remove(taskId);
     }
 
     private void getTasksFromRemoteDataSource(@NonNull String userId, @NonNull final LoadTasksCallback callback) {
@@ -111,8 +180,8 @@ public class TasksRepository implements ITasksDataSource {
             @Override
             public void onTasksLoaded(List<? extends ITask> tasks) {
                 refreshCache(tasks);
-                refreshLocalDataSource(tasks);
-                appExecutors.mainThread().execute(() -> callback.onTasksLoaded(new ArrayList<>(mCachedTasks.values())));
+                refreshLocalDataSource(userId, tasks);
+                appExecutors.mainThread().execute(() -> callback.onTasksLoaded(new ArrayList<>(getCachedTasks().values())));
             }
 
             @Override
@@ -122,18 +191,23 @@ public class TasksRepository implements ITasksDataSource {
         });
     }
 
-    private void refreshLocalDataSource(List<? extends ITask> tasks) {
+    private void refreshLocalDataSource(@NonNull String userId, List<? extends ITask> tasks) {
+        tasksLocalDataSource.deleteAllTasks(userId);
         tasksLocalDataSource.saveTasks((List<Task>) tasks, null);
     }
 
     private void refreshCache(List<? extends ITask> tasks) {
-        if (mCachedTasks == null) {
-            mCachedTasks = new ArrayMap<>();
-        }
-        mCachedTasks.clear();
+        getCachedTasks().clear();
         for (ITask task : tasks) {
-            mCachedTasks.put(task.getId(), task);
+            getCachedTasks().put(task.getId(), task);
         }
-        mCacheIsDirty = false;
+        cacheIsDirty = false;
+    }
+
+    private Map<String, ITask> getCachedTasks() {
+        if (cachedTasks == null) {
+            cachedTasks = new ArrayMap<>();
+        }
+        return cachedTasks;
     }
 }

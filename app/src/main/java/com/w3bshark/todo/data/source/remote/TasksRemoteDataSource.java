@@ -2,7 +2,9 @@ package com.w3bshark.todo.data.source.remote;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.ArrayMap;
 
+import com.w3bshark.todo.BuildConfig;
 import com.w3bshark.todo.data.Task;
 import com.w3bshark.todo.data.source.ITasksDataSource;
 import com.w3bshark.todo.util.AppExecutors;
@@ -30,6 +32,8 @@ import timber.log.Timber;
 
 @Singleton
 public class TasksRemoteDataSource implements ITasksDataSource {
+
+    private static final String DEV_AUTH_TOKEN = BuildConfig.DEV_AUTH_TOKEN;
 
     private final IFirebaseService service;
 
@@ -60,7 +64,7 @@ public class TasksRemoteDataSource implements ITasksDataSource {
                             }
 
                             @Override
-                            public void onFailure(Call<Map<String, Task>> call, Throwable t) {
+                            public void onFailure(@NonNull Call<Map<String, Task>> call, @NonNull Throwable t) {
                                 Timber.e(t, "remote getTasks: request failed");
                                 callback.onDataNotAvailable();
                             }
@@ -74,7 +78,7 @@ public class TasksRemoteDataSource implements ITasksDataSource {
                 service.getTask(DEV_AUTH_TOKEN, "\"" + taskId + "\"")
                         .enqueue(new Callback<Task>() {
                             @Override
-                            public void onResponse(Call<Task> call, Response<Task> response) {
+                            public void onResponse(@NonNull Call<Task> call, @NonNull Response<Task> response) {
                                 if (response.isSuccessful() && response.body() != null) {
                                     callback.onTaskLoaded(response.body());
                                 } else {
@@ -84,7 +88,7 @@ public class TasksRemoteDataSource implements ITasksDataSource {
                             }
 
                             @Override
-                            public void onFailure(Call<Task> call, Throwable t) {
+                            public void onFailure(@NonNull Call<Task> call, @NonNull Throwable t) {
                                 Timber.e(t, "remote getTasks: request failed");
                                 callback.onDataNotAvailable();
                             }
@@ -98,7 +102,91 @@ public class TasksRemoteDataSource implements ITasksDataSource {
     }
 
     @Override
-    public void saveTask(@NonNull Task task, @NonNull SaveTaskCallback callback) {
+    public void saveTask(@NonNull Task task) {
+        //TODO queue a new job rather than
+        appExecutors.networkIO().execute(() ->
+                service.createUpdateTask(task.getId(), DEV_AUTH_TOKEN, task)
+                        .enqueue(new Callback<Task>() {
+                            @Override
+                            public void onResponse(@NonNull Call<Task> call, @NonNull Response<Task> response) {
+                            }
 
+                            @Override
+                            public void onFailure(@NonNull Call<Task> call, @NonNull Throwable t) {
+                                Timber.e(t, "remote getTasks: request failed");
+                                // callback.onDataNotAvailable();
+                            }
+                        })
+        );
+    }
+
+    @Override
+    public void completeTask(@NonNull Task task) {
+        appExecutors.networkIO().execute(() -> {
+            Map<String, Boolean> completionMap = new ArrayMap<>();
+            completionMap.put(Task.COLUMN_COMPLETED, true);
+            service.markTaskCompletion(task.getId(), DEV_AUTH_TOKEN, completionMap)
+                    .enqueue(new Callback<Map<String, String>>() {
+                        @Override
+                        public void onResponse(@NonNull Call<Map<String, String>> call, @NonNull Response<Map<String, String>> response) {
+
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<Map<String, String>> call, @NonNull Throwable t) {
+                            Timber.e(t, "remote getTasks: request failed");
+                            // callback.onDataNotAvailable();
+                        }
+                    });
+        });
+    }
+
+    @Override
+    public void activateTask(@NonNull Task task) {
+        appExecutors.networkIO().execute(() -> {
+            Map<String, Boolean> completionMap = new ArrayMap<>();
+            completionMap.put(Task.COLUMN_COMPLETED, false);
+            service.markTaskCompletion(task.getId(), DEV_AUTH_TOKEN, completionMap)
+                    .enqueue(new Callback<Map<String, String>>() {
+                        @Override
+                        public void onResponse(@NonNull Call<Map<String, String>> call, @NonNull Response<Map<String, String>> response) {
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<Map<String, String>> call, @NonNull Throwable t) {
+                            Timber.e(t, "remote getTasks: request failed");
+                            // callback.onDataNotAvailable();
+                        }
+                    });
+        });
+    }
+
+    @Override
+    public void refreshTasks() {
+        // N/A
+    }
+
+    @Override
+    public void deleteAllTasks(@NonNull String userId) {
+
+    }
+
+    @Override
+    public void deleteTask(@NonNull String taskId) {
+        appExecutors.networkIO().execute(() ->
+                service.deleteTask(taskId, DEV_AUTH_TOKEN)
+                        .enqueue(new Callback<Map<String, String>>() {
+                            @Override
+                            public void onResponse(@NonNull Call<Map<String, String>> call,
+                                                   @NonNull Response<Map<String, String>> response) {
+
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<Map<String, String>> call, @NonNull Throwable t) {
+
+                            }
+                        })
+        );
     }
 }

@@ -55,10 +55,12 @@ android {
         staging {
             buildConfigField "String", "HOSTNAME", "\"http://www.someURL.com\""
             dimension "environment"
+            buildConfigField "String", "DEV_AUTH_TOKEN", "Add your own auth token here"
         }
         prod {
             buildConfigField "String", "HOSTNAME", "\"http://www.someURL.com\""
             dimension "environment"
+            buildConfigField "String", "DEV_AUTH_TOKEN", "Add your own auth token here"
         }
     }
     buildTypes {
