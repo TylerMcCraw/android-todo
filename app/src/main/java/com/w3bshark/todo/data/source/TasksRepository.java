@@ -15,9 +15,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.squareup.haha.guava.base.Joiner.checkNotNull;
-
-
 /**
  * Created by Tyler McCraw on 5/27/17.
  * <p/>
@@ -61,8 +58,6 @@ public class TasksRepository implements ITasksDataSource {
 
     @Override
     public void getTasks(@NonNull String userId, @NonNull LoadTasksCallback callback) {
-        checkNotNull(callback);
-
         if (!cacheIsDirty) {
             if (!getCachedTasks().isEmpty()) {
                 // Respond immediately with cache if available and not dirty
@@ -90,9 +85,6 @@ public class TasksRepository implements ITasksDataSource {
 
     @Override
     public void getTask(@NonNull String taskId, @NonNull LoadTaskCallback callback) {
-        checkNotNull(taskId);
-        checkNotNull(callback);
-
         ITask cachedTask = getCachedTasks().get(taskId);
         if (cachedTask != null) {
             callback.onTaskLoaded(cachedTask);
@@ -124,7 +116,6 @@ public class TasksRepository implements ITasksDataSource {
 
     @Override
     public void saveTask(@NonNull Task task) {
-        checkNotNull(task);
         tasksRemoteDataSource.saveTask(task);
         tasksLocalDataSource.saveTask(task);
         getCachedTasks().put(task.getId(), task);
@@ -141,7 +132,6 @@ public class TasksRepository implements ITasksDataSource {
 
     @Override
     public void completeTask(@NonNull Task task) {
-        checkNotNull(task);
         tasksRemoteDataSource.completeTask(task);
         tasksLocalDataSource.completeTask(task);
         getCachedTasks().put(task.getId(), task);
@@ -149,7 +139,6 @@ public class TasksRepository implements ITasksDataSource {
 
     @Override
     public void activateTask(@NonNull Task task) {
-        checkNotNull(task);
         tasksRemoteDataSource.activateTask(task);
         tasksLocalDataSource.activateTask(task);
         getCachedTasks().put(task.getId(), task);
@@ -169,7 +158,6 @@ public class TasksRepository implements ITasksDataSource {
 
     @Override
     public void deleteTask(@NonNull String taskId) {
-        checkNotNull(taskId);
         tasksRemoteDataSource.deleteTask(taskId);
         tasksLocalDataSource.deleteTask(taskId);
         getCachedTasks().remove(taskId);

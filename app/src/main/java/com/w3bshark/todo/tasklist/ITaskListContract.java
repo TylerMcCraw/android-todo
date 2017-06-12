@@ -1,5 +1,7 @@
 package com.w3bshark.todo.tasklist;
 
+import android.support.annotation.NonNull;
+
 import com.w3bshark.todo.data.ITask;
 import com.w3bshark.todo.util.IBasePresenter;
 import com.w3bshark.todo.util.IBaseView;
@@ -15,19 +17,33 @@ import java.util.List;
 public interface ITaskListContract {
 
     interface View extends IBaseView<Presenter> {
+
+        void setLoadingIndicator(boolean active);
+
         void goToSignInScreen();
 
-        void goToAddNewTaskScreen(android.view.View viewClicked);
-
         void showTasks(List<? extends ITask> tasks);
+
+        void showAddTask();
+
+        void showTaskDetailsUi(String taskId);
+
+        void showLoadingTasksError();
 
         void showEmptyView();
     }
 
     interface Presenter extends IBasePresenter {
+
         void loadTasks(boolean forceUpdate);
 
         void addNewTask();
+
+        void openTaskDetails(@NonNull ITask requestedTask);
+
+        void completeTask(@NonNull ITask task);
+
+        void activateTask(@NonNull ITask task);
 
         void signOut();
     }

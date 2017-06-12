@@ -1,6 +1,5 @@
 package com.w3bshark.todo.tasklist;
 
-import com.w3bshark.todo.data.source.IAuthComponent;
 import com.w3bshark.todo.data.source.ISessionComponent;
 import com.w3bshark.todo.util.ActivityScoped;
 
@@ -11,7 +10,7 @@ import dagger.Component;
  * <p/>
  * Dagger component for Task List screen.
  * <p/>
- * Because this component depends on the {@link IAuthComponent},
+ * Because this component depends on the {@link ISessionComponent},
  * which is a singleton, a scope must be specified. All activity/fragment components use a custom scope for this purpose.
  */
 
