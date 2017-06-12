@@ -11,7 +11,7 @@ import com.w3bshark.todo.data.Task;
  * Room Database definition which defines all entities
  */
 
-@Database(entities = {Task.class}, version = 1)
+@Database(entities = {Task.class}, version = 2)
 public abstract class ToDoSQLiteDb extends RoomDatabase {
 
     public abstract TaskDao taskDao();
