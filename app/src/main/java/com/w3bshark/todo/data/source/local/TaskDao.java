@@ -25,12 +25,18 @@ public abstract class TaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public abstract void insertTask(Task task);
 
-    @Query("SELECT * FROM task WHERE id = :taskId")
+    @Query("SELECT * FROM " + Task.TABLE_NAME + " WHERE " + Task.COLUMN_ID + " = :taskId")
     public abstract Task loadTask(String taskId);
 
-    @Query("SELECT * FROM task WHERE user = :userId")
+    @Query("SELECT * FROM " + Task.TABLE_NAME + " WHERE " + Task.COLUMN_USER + " = :userId")
     public abstract List<Task> loadAllTasksForUser(String userId);
 
     @Update
     public abstract void updateTask(Task task);
+
+    @Query("DELETE FROM " + Task.TABLE_NAME + " WHERE " + Task.COLUMN_USER + " = :userId")
+    public abstract void deleteAllTasks(String userId);
+
+    @Query("DELETE FROM " + Task.TABLE_NAME + " WHERE " + Task.COLUMN_ID + " = :taskId")
+    public abstract void deleteTask(String taskId);
 }
