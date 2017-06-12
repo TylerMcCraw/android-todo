@@ -28,7 +28,7 @@ final class SignInPresenter implements ISignInContract.Presenter, GoogleApiClien
 
     private final FirebaseAuth firebaseAuth;
     private final GoogleApiClient googleApiClient;
-    private ISignInContract.View view;
+    private final ISignInContract.View view;
 
     @Inject
     SignInPresenter(FirebaseAuth firebaseAuth,
