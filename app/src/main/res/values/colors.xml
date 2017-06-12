@@ -5,4 +5,5 @@
     <color name="colorAccent">#4CAF50</color>
     <color name="colorControlHighlight">#424CAF50</color>
 
+    <color name="red">#F44336</color>
 </resources>

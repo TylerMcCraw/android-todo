@@ -1,16 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.w3bshark.todo.signin.SignInActivity">
     <item
-        android:id="@+id/sync"
+        android:id="@+id/delete"
+        android:icon="@drawable/ic_delete_white_24dp"
         android:orderInCategory="100"
-        android:title="@string/sync"
-        android:icon="@drawable/ic_sync_white_24dp"
+        android:title="@string/delete"
         app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/sign_out_menu"
-        android:orderInCategory="200"
-        android:title="@string/sign_out"
-        app:showAsAction="never"/>
 </menu>

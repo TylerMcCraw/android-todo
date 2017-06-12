@@ -1,10 +1,16 @@
 <resources>
-    <string name="app_name">Get Shit Done</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">To-Do Offline - Simple</string>
 
     <string name="sign_out">Sign Out</string>
     <string name="google_play_services_error">Google Play Services error.</string>
     <string name="google_sign_in_failed">Google Sign In failed</string>
     <string name="auth_has_failed">Authentication has failed</string>
     <string name="empty_tasks">All done!</string>
+    <string name="edit_task">Edit Task</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="error_title_is_required">Required</string>
+    <string name="loading_tasks_error">Error while loading tasks</string>
+    <string name="sync">Sync</string>
+    <string name="delete">Delete</string>
 </resources>

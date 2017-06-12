@@ -20,4 +20,7 @@
         <item name="android:windowBackground">@drawable/splash</item>
     </style>
 
+    <style name="AppTheme.TextInputLayoutErrorText" parent="TextAppearance.Design.Error">
+        <item name="android:textColor">@color/red</item>
+    </style>
 </resources>
