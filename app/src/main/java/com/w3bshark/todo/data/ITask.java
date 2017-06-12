@@ -12,7 +12,11 @@ public interface ITask {
 
     String getId();
 
+    String getUser();
+
     String getTitle();
+
+    String getDescription();
 
     boolean isCompleted();
 }
