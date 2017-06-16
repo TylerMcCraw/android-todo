@@ -10,7 +10,7 @@ import com.w3bshark.todo.data.source.IAuthComponent;
 import com.w3bshark.todo.data.source.ISessionComponent;
 import com.w3bshark.todo.data.source.local.DiskModule;
 import com.w3bshark.todo.data.source.local.GsonModule;
-import com.w3bshark.todo.data.source.remote.FirebaseModule;
+import com.w3bshark.todo.data.source.remote.FirebaseAuthModule;
 import com.w3bshark.todo.data.source.remote.GoogleApiModule;
 import com.w3bshark.todo.data.source.remote.NetworkModule;
 import com.w3bshark.todo.util.ApplicationModule;
@@ -67,17 +67,17 @@ public class MainApplication extends Application {
 
     private void initComponents() {
         ApplicationModule applicationModule = new ApplicationModule(this);
-        FirebaseModule firebaseModule = new FirebaseModule();
+        FirebaseAuthModule firebaseAuthModule = new FirebaseAuthModule();
         GoogleApiModule googleApiModule = new GoogleApiModule();
 
         authComponent = DaggerIAuthComponent.builder()
-                .firebaseModule(firebaseModule)
+                .firebaseAuthModule(firebaseAuthModule)
                 .googleApiModule(googleApiModule)
                 .applicationModule(applicationModule)
                 .build();
 
         sessionComponent = DaggerISessionComponent.builder()
-                .firebaseModule(firebaseModule)
+                .firebaseAuthModule(firebaseAuthModule)
                 .googleApiModule(googleApiModule)
                 .applicationModule(applicationModule)
                 .networkModule(new NetworkModule(BuildConfig.HOSTNAME))

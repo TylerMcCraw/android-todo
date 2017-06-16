@@ -23,7 +23,7 @@ import dagger.Component;
  */
 
 @Singleton
-@Component(modules = {FirebaseModule.class, GoogleApiModule.class, ApplicationModule.class, AppExecutorsModule.class,
+@Component(modules = {FirebaseAuthModule.class, GoogleApiModule.class, ApplicationModule.class, AppExecutorsModule.class,
         NetworkModule.class, DiskModule.class, GsonModule.class, TasksRepositoryModule.class})
 public interface ISessionComponent {
 
