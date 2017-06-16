@@ -4,7 +4,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.w3bshark.todo.data.source.local.DiskModule;
 import com.w3bshark.todo.data.source.local.GsonModule;
-import com.w3bshark.todo.data.source.remote.FirebaseModule;
+import com.w3bshark.todo.data.source.remote.FirebaseAuthModule;
 import com.w3bshark.todo.data.source.remote.GoogleApiModule;
 import com.w3bshark.todo.data.source.remote.NetworkModule;
 import com.w3bshark.todo.util.AppExecutorsModule;
