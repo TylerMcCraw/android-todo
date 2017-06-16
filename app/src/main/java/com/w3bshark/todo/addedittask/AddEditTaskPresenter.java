@@ -24,7 +24,7 @@ import timber.log.Timber;
 
 final class AddEditTaskPresenter implements IAddEditTaskContract.Presenter, ITasksDataSource.LoadTaskCallback {
 
-    private final TasksRepository tasksRepository;
+    private final ITasksDataSource tasksRepository;
     private final FirebaseAuth firebaseAuth;
     private final IAddEditTaskContract.View view;
     @Nullable

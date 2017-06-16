@@ -30,7 +30,7 @@ final class TaskListPresenter implements ITaskListContract.Presenter, GoogleApiC
 
     private final FirebaseAuth firebaseAuth;
     private final GoogleApiClient googleApiClient;
-    private final TasksRepository tasksRepository;
+    private final ITasksDataSource tasksRepository;
     private final ITaskListContract.View view;
 
     @Inject
