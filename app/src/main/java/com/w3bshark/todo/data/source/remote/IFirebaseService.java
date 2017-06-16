@@ -2,6 +2,7 @@ package com.w3bshark.todo.data.source.remote;
 
 import com.w3bshark.todo.data.Task;
 
+import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -9,6 +10,7 @@ import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
+import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -41,6 +43,12 @@ interface IFirebaseService {
             @Path("id") String taskId,
             @Query("auth") String authToken,
             @Body Task task
+    );
+
+    @PATCH("/v1/tasks.json")
+    Call<List<Task>> saveTasks(
+            @Query("auth") String authToken,
+            @Body Map<String, Task> taskMap
     );
 
     @PATCH("/v1/tasks/{id}.json")

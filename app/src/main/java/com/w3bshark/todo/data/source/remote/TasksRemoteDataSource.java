@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.ArrayMap;
 
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.w3bshark.todo.BuildConfig;
 import com.w3bshark.todo.data.Task;
 import com.w3bshark.todo.data.source.ITasksDataSource;
@@ -98,11 +99,48 @@ public class TasksRemoteDataSource implements ITasksDataSource {
 
     @Override
     public void saveTasks(List<Task> tasks, @Nullable SaveTaskCallback callback) {
+        appExecutors.networkIO().execute(() -> {
+            ArrayMap<String, Task> taskMap = new ArrayMap<>();
+            for (Task task : tasks) {
+                taskMap.put(task.getId(), task);
+            }
+            service.saveTasks(DEV_AUTH_TOKEN, taskMap)
+                    .enqueue(new Callback<List<Task>>() {
+                        @Override
+                        public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
 
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<Task>> call, Throwable t) {
+
+                        }
+                    });
+        });
     }
 
     @Override
     public void saveTask(@NonNull Task task) {
+//        Bundle myExtrasBundle = new Bundle();
+//        myExtrasBundle.putString(SaveTaskJobService.KEY_TASK_ID, task.getId());
+//
+//        Job myJob = jobDispatcher.newJobBuilder()
+//                .setService(SaveTaskJobService.class)
+//                .setTag("my-unique-tag")
+//                // one-off job
+//                .setRecurring(false)
+//                // don't persist past a device reboot
+//                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+//                // start between 0 and 60 seconds from now
+//                .setTrigger(Trigger.executionWindow(0, 60))
+//                .setReplaceCurrent(false)
+//                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+//                .setExtras(myExtrasBundle)
+//                .build();
+//
+//        dispatcher.mustSchedule(myJob);
+
+
         //TODO queue a new job rather than
         appExecutors.networkIO().execute(() ->
                 service.createUpdateTask(task.getId(), DEV_AUTH_TOKEN, task)
@@ -172,7 +210,7 @@ public class TasksRemoteDataSource implements ITasksDataSource {
     }
 
     @Override
-    public void deleteTask(@NonNull String taskId) {
+    public void deleteTask(@NonNull String userId, @NonNull String taskId) {
         appExecutors.networkIO().execute(() ->
                 service.deleteTask(taskId, DEV_AUTH_TOKEN)
                         .enqueue(new Callback<Map<String, String>>() {

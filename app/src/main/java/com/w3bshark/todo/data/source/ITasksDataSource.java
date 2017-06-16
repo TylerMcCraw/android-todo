@@ -56,6 +56,6 @@ public interface ITasksDataSource {
 
     void deleteAllTasks(@NonNull String userId);
 
-    void deleteTask(@NonNull String taskId);
+    void deleteTask(@NonNull String userId, @NonNull String taskId);
 
 }

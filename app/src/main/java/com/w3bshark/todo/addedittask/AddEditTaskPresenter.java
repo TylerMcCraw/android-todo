@@ -83,7 +83,11 @@ final class AddEditTaskPresenter implements IAddEditTaskContract.Presenter, ITas
         if (TextUtils.isEmpty(taskId)) {
             throw new RuntimeException("deleteTask() was called but task ID is null.");
         }
-        tasksRepository.deleteTask(taskId);
+        FirebaseUser user = getUser();
+        if (user == null) {
+            return;
+        }
+        tasksRepository.deleteTask(user.getUid(), taskId);
         view.goBackToTaskList();
     }
 

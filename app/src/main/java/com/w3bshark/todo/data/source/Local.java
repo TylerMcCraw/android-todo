@@ -15,5 +15,5 @@ import javax.inject.Qualifier;
 @Qualifier
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@interface Local {
+public @interface Local {
 }

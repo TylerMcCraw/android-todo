@@ -1,11 +1,19 @@
 package com.w3bshark.todo.data.source;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.ArrayMap;
 
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.JobTrigger;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Trigger;
 import com.w3bshark.todo.data.ITask;
 import com.w3bshark.todo.data.Task;
+import com.w3bshark.todo.data.source.remote.PushAllTasksJobService;
 import com.w3bshark.todo.util.AppExecutors;
 
 import java.util.ArrayList;
@@ -29,6 +37,8 @@ public class TasksRepository implements ITasksDataSource {
     private final ITasksDataSource tasksRemoteDataSource;
     private final ITasksDataSource tasksLocalDataSource;
 
+    private final FirebaseJobDispatcher jobDispatcher;
+
     private final AppExecutors appExecutors;
 
     private Map<String, ITask> cachedTasks;
@@ -37,6 +47,11 @@ public class TasksRepository implements ITasksDataSource {
      * Marks the cache as invalid, to force an update the next time data is requested.
      */
     private boolean cacheIsDirty = false;
+
+    /**
+     * Marks the that a PushAllTasks job has been scheduled
+     */
+    private boolean pushAllTasksJobScheduled = false;
 
     /**
      * By marking the constructor with {@code @Inject}, Dagger will try to inject the dependencies
@@ -50,14 +65,17 @@ public class TasksRepository implements ITasksDataSource {
     @Inject
     TasksRepository(@Remote ITasksDataSource tasksRemoteDataSource,
                     @Local ITasksDataSource tasksLocalDataSource,
+                    FirebaseJobDispatcher jobDispatcher,
                     AppExecutors appExecutors) {
         this.tasksRemoteDataSource = tasksRemoteDataSource;
         this.tasksLocalDataSource = tasksLocalDataSource;
+        this.jobDispatcher = jobDispatcher;
         this.appExecutors = appExecutors;
     }
 
     @Override
     public void getTasks(@NonNull String userId, @NonNull LoadTasksCallback callback) {
+//      TODO  if offline -> online and need to resync, then delay resync until after all jobs have been pushed --- only set cacheIsDirty from response of jobdispatcher job
         if (!cacheIsDirty) {
             if (!getCachedTasks().isEmpty()) {
                 // Respond immediately with cache if available and not dirty
@@ -116,32 +134,36 @@ public class TasksRepository implements ITasksDataSource {
 
     @Override
     public void saveTask(@NonNull Task task) {
-        tasksRemoteDataSource.saveTask(task);
         tasksLocalDataSource.saveTask(task);
+        tasksRemoteDataSource.saveTask(task);
         getCachedTasks().put(task.getId(), task);
+        schedulePushAllTasksJob(task.getUser());
     }
 
     @Override
     public void saveTasks(List<Task> tasks, @Nullable SaveTaskCallback callback) {
-        tasksRemoteDataSource.saveTasks(tasks, null);
         tasksLocalDataSource.saveTasks(tasks, null);
+        tasksRemoteDataSource.saveTasks(tasks, null);
         for (Task task : tasks) {
             getCachedTasks().put(task.getId(), task);
         }
+        schedulePushAllTasksJob(tasks.get(0).getUser());
     }
 
     @Override
     public void completeTask(@NonNull Task task) {
-        tasksRemoteDataSource.completeTask(task);
         tasksLocalDataSource.completeTask(task);
+        tasksRemoteDataSource.completeTask(task);
         getCachedTasks().put(task.getId(), task);
+        schedulePushAllTasksJob(task.getUser());
     }
 
     @Override
     public void activateTask(@NonNull Task task) {
-        tasksRemoteDataSource.activateTask(task);
         tasksLocalDataSource.activateTask(task);
+        tasksRemoteDataSource.activateTask(task);
         getCachedTasks().put(task.getId(), task);
+        schedulePushAllTasksJob(task.getUser());
     }
 
     @Override
@@ -151,16 +173,18 @@ public class TasksRepository implements ITasksDataSource {
 
     @Override
     public void deleteAllTasks(@NonNull String userId) {
-        tasksRemoteDataSource.deleteAllTasks(userId);
         tasksLocalDataSource.deleteAllTasks(userId);
+        tasksRemoteDataSource.deleteAllTasks(userId);
         getCachedTasks().clear();
+        schedulePushAllTasksJob(userId);
     }
 
     @Override
-    public void deleteTask(@NonNull String taskId) {
-        tasksRemoteDataSource.deleteTask(taskId);
-        tasksLocalDataSource.deleteTask(taskId);
+    public void deleteTask(@NonNull String userId, @NonNull String taskId) {
+        tasksLocalDataSource.deleteTask(userId, taskId);
+        tasksRemoteDataSource.deleteTask(userId, taskId);
         getCachedTasks().remove(taskId);
+        schedulePushAllTasksJob(userId);
     }
 
     private void getTasksFromRemoteDataSource(@NonNull String userId, @NonNull final LoadTasksCallback callback) {
@@ -197,5 +221,30 @@ public class TasksRepository implements ITasksDataSource {
             cachedTasks = new ArrayMap<>();
         }
         return cachedTasks;
+    }
+
+    private void schedulePushAllTasksJob(@NonNull String userId) {
+//        if (!pushAllTasksJobScheduled) {
+            Bundle jobExtras = new Bundle();
+            jobExtras.putString(PushAllTasksJobService.KEY_USER_ID, userId);
+
+            Job myJob = jobDispatcher.newJobBuilder()
+                    .setService(PushAllTasksJobService.class)
+                    .setTag(PushAllTasksJobService.class.getName())
+                    .setRecurring(false)
+                    .setLifetime(Lifetime.FOREVER)
+                    // start between 10 and 60 seconds from now
+                    .setTrigger(Trigger.executionWindow(10, 60))
+                    .setReplaceCurrent(true)
+                    .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                    .setExtras(jobExtras)
+                    .build();
+            jobDispatcher.mustSchedule(myJob);
+
+            pushAllTasksJobScheduled = true; //TODO update this from job finish
+            //TODO cancel this job if user signs out
+            //TODO only schedule this if offline
+            //TODO persist task object (parcelable?) with job so that if job refreshes from backend, we still push the original updated version
+//        }
     }
 }

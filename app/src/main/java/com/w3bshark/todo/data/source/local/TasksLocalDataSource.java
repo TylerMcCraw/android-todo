@@ -91,7 +91,7 @@ public class TasksLocalDataSource implements ITasksDataSource {
     }
 
     @Override
-    public void deleteTask(@NonNull String taskId) {
+    public void deleteTask(@NonNull String userId, @NonNull String taskId) {
         appExecutors.diskIO().execute(() -> taskDao.deleteTask(taskId));
     }
 }

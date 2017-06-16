@@ -102,6 +102,9 @@ dependencies {
     annotationProcessor 'android.arch.lifecycle:compiler:1.0.0-alpha2'
     annotationProcessor 'android.arch.persistence.room:compiler:1.0.0-alpha2'
 
+    // Job Dispatching
+    compile 'com.firebase:firebase-jobdispatcher:0.6.0'
+
     // Google
     compile 'com.google.android.gms:play-services-auth:11.0.0'
 

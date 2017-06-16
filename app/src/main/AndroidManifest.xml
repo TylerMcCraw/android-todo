@@ -47,6 +47,21 @@
             android:label="@string/edit_task"
             android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".tasklist.TaskListActivity"/>
+
+        <service
+            android:exported="false"
+            android:name=".data.source.remote.PushAllTasksJobService">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+            </intent-filter>
+        </service>
+        <service
+            android:exported="false"
+            android:name=".data.source.remote.SaveTaskJobService">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

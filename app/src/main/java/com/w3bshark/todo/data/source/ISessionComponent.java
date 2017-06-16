@@ -9,6 +9,7 @@ import com.w3bshark.todo.data.source.remote.GoogleApiModule;
 import com.w3bshark.todo.data.source.remote.NetworkModule;
 import com.w3bshark.todo.util.AppExecutorsModule;
 import com.w3bshark.todo.util.ApplicationModule;
+import com.w3bshark.todo.util.JobDispatcherModule;
 
 import javax.inject.Singleton;
 
@@ -24,7 +25,7 @@ import dagger.Component;
 
 @Singleton
 @Component(modules = {FirebaseModule.class, GoogleApiModule.class, ApplicationModule.class, AppExecutorsModule.class,
-        NetworkModule.class, DiskModule.class, GsonModule.class, TasksRepositoryModule.class})
+        NetworkModule.class, DiskModule.class, GsonModule.class, JobDispatcherModule.class, TasksRepositoryModule.class})
 public interface ISessionComponent {
 
     FirebaseAuth firebaseAuth();
