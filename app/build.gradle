@@ -15,7 +15,7 @@ releaseKeystoreProperties.load(new FileInputStream(releaseKeystorePropertiesFile
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion "25.0.3"
     defaultConfig {
         applicationId "com.w3bshark.todo"
         minSdkVersion 21
@@ -86,36 +86,26 @@ android {
 
 dependencies {
     // Support libs
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support:cardview-v7:25.3.1'
-    compile 'com.android.support:recyclerview-v7:25.3.1'
-
-    // Networking
-    compile 'com.squareup.retrofit2:retrofit:2.3.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.3.0'
-    compile 'com.google.code.gson:gson:2.8.0'
-
-    // Persistence
-    compile 'android.arch.lifecycle:extensions:1.0.0-alpha2'
-    compile 'android.arch.persistence.room:runtime:1.0.0-alpha2'
-    annotationProcessor 'android.arch.lifecycle:compiler:1.0.0-alpha2'
-    annotationProcessor 'android.arch.persistence.room:compiler:1.0.0-alpha2'
+    compile 'com.android.support:appcompat-v7:25.4.0'
+    compile 'com.android.support:design:25.4.0'
+    compile 'com.android.support:cardview-v7:25.4.0'
+    compile 'com.android.support:recyclerview-v7:25.4.0'
 
     // Google
-    compile 'com.google.android.gms:play-services-auth:11.0.0'
+    compile 'com.google.android.gms:play-services-auth:11.0.2'
 
     // Firebase
-    compile 'com.google.firebase:firebase-analytics:11.0.0'
-    compile 'com.google.firebase:firebase-auth:11.0.0'
-    compile 'com.google.firebase:firebase-crash:11.0.0'
+    compile 'com.google.firebase:firebase-analytics:11.0.2'
+    compile 'com.google.firebase:firebase-auth:11.0.2'
+    compile 'com.google.firebase:firebase-database:11.0.2'
+    compile 'com.google.firebase:firebase-crash:11.0.2'
 
     // Calligraphy - Fonts
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
 
     // Butterknife
-    compile 'com.jakewharton:butterknife:8.5.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    compile 'com.jakewharton:butterknife:8.6.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
 
     // Glide
     compile 'com.github.bumptech.glide:glide:3.7.0'
@@ -126,17 +116,17 @@ dependencies {
     annotationProcessor 'frankiesardo:icepick-processor:3.2.0'
 
     // Dependency Injection
-    compile 'com.google.dagger:dagger:2.10'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.10'
+    compile 'com.google.dagger:dagger:2.11'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
 
     // Dev libs
     compile 'com.jakewharton.timber:timber:4.5.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.7.0'
     debugCompile 'com.facebook.stetho:stetho:1.5.0'
     debugCompile 'com.facebook.stetho:stetho-okhttp3:1.5.0'
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
 
     // Tests
     testCompile 'junit:junit:4.12'
