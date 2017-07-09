@@ -2,11 +2,8 @@ package com.w3bshark.todo.data.source;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
-import com.w3bshark.todo.data.source.local.DiskModule;
-import com.w3bshark.todo.data.source.local.GsonModule;
 import com.w3bshark.todo.data.source.remote.FirebaseAuthModule;
 import com.w3bshark.todo.data.source.remote.GoogleApiModule;
-import com.w3bshark.todo.data.source.remote.NetworkModule;
 import com.w3bshark.todo.util.AppExecutorsModule;
 import com.w3bshark.todo.util.ApplicationModule;
 
@@ -24,7 +21,7 @@ import dagger.Component;
 
 @Singleton
 @Component(modules = {FirebaseAuthModule.class, GoogleApiModule.class, ApplicationModule.class, AppExecutorsModule.class,
-        NetworkModule.class, DiskModule.class, GsonModule.class, TasksRepositoryModule.class})
+        FirebaseDbModule.class})
 public interface ISessionComponent {
 
     FirebaseAuth firebaseAuth();
