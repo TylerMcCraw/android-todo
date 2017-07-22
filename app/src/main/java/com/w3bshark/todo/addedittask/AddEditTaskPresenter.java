@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.w3bshark.todo.R;
 import com.w3bshark.todo.data.ITask;
 import com.w3bshark.todo.data.Task;
 import com.w3bshark.todo.data.source.ITasksDataSource;
@@ -51,7 +52,12 @@ final class AddEditTaskPresenter implements IAddEditTaskContract.Presenter, ITas
 
     @Override
     public void start() {
-        if (!isNewTask()) {
+        if (isNewTask()) {
+            view.toggleDeleteButton(false);
+            view.setActionBarTitle(R.string.create_task);
+        } else {
+            view.toggleDeleteButton(true);
+            view.setActionBarTitle(R.string.edit_task);
             loadTask();
         }
     }

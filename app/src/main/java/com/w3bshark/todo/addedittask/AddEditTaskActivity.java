@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -40,6 +41,8 @@ public class AddEditTaskActivity extends AppCompatActivity implements IAddEditTa
 
     @State
     String taskId;
+    @State
+    boolean showDeleteButton = true;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -101,6 +104,7 @@ public class AddEditTaskActivity extends AppCompatActivity implements IAddEditTa
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_add_edit_task, menu);
+        menu.findItem(R.id.delete).setVisible(showDeleteButton);
         return true;
     }
 
@@ -124,6 +128,17 @@ public class AddEditTaskActivity extends AppCompatActivity implements IAddEditTa
     public void onFabClicked() {
         titleInputLayout.setError(null);
         presenter.saveTask(titleEditText.getText().toString(), descriptionEditText.getText().toString());
+    }
+
+    @Override
+    public void setActionBarTitle(@StringRes int titleRes) {
+        setTitle(titleRes);
+    }
+
+    @Override
+    public void toggleDeleteButton(boolean showDeleteBtn) {
+        showDeleteButton = showDeleteBtn;
+        invalidateOptionsMenu();
     }
 
     @Override

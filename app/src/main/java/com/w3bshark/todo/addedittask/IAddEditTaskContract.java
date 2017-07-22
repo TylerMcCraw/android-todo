@@ -1,5 +1,7 @@
 package com.w3bshark.todo.addedittask;
 
+import android.support.annotation.StringRes;
+
 import com.w3bshark.todo.util.IBasePresenter;
 import com.w3bshark.todo.util.IBaseView;
 
@@ -22,6 +24,10 @@ public interface IAddEditTaskContract {
         void setTitle(String title);
 
         void setDescription(String description);
+
+        void toggleDeleteButton(boolean showDeleteBtn);
+
+        void setActionBarTitle(@StringRes int titleRes);
     }
 
     interface Presenter extends IBasePresenter {
