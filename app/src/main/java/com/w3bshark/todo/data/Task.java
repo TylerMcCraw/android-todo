@@ -1,69 +1,48 @@
 package com.w3bshark.todo.data;
 
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.Index;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.google.gson.annotations.SerializedName;
-import com.w3bshark.todo.util.FireBasePushIdGenerator;
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.IgnoreExtraProperties;
 
 /**
  * Created by Tyler McCraw on 5/26/17.
  * <p/>
- * Note: it would be great if we could
+ * Immutable Task model
  */
 
-@Entity(tableName = Task.TABLE_NAME, indices = {@Index("id"), @Index("user")}, primaryKeys = {"id"})
+@IgnoreExtraProperties
 public final class Task implements ITask {
 
-    public static final String TABLE_NAME = "task";
-    public static final String COLUMN_ID = "id";
-    public static final String COLUMN_USER = "user";
-    public static final String COLUMN_COMPLETED = "completed";
-
-    /* We can't make these all `final` or `private` due to current limitations of Room API */
-    @SerializedName(COLUMN_ID)
-    public String id;
-
-    @SerializedName(COLUMN_USER)
-    public final String user;
-
-    @SerializedName("title")
-    public final String title;
-
-    @SerializedName("description")
+    /* We can't make these all `final` due to current limitations of FirebaseDatabase API */
+    private String id;
+    private String title;
     @Nullable
-    public final String description;
+    private String description;
+    private boolean completed;
 
-    @SerializedName(COLUMN_COMPLETED)
-    public final boolean completed;
+    public Task() {
+        // Default constructor required for calls to DataSnapshot.getValue(Task.class)
+    }
 
-    public Task(@NonNull String id, @NonNull String user, String title, @Nullable String description, boolean completed) {
+    public Task(@NonNull String id, String title, @Nullable String description, boolean completed) {
         this.id = id;
-        this.user = user;
         this.title = title;
         this.description = description;
         this.completed = completed;
     }
 
-    /**
-     * Constructor to create new Tasks with a auto-generated ID
-     */
-    @Ignore
-    public Task(@NonNull String user, String title, @Nullable String description, boolean completed) {
-        this.id = FireBasePushIdGenerator.generatePushId();
-        this.user = user;
-        this.title = title;
-        this.description = description;
-        this.completed = completed;
-    }
-
+    @Exclude
     @Override
     public String getId() {
         return id;
+    }
+
+    @Exclude
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override
@@ -82,11 +61,9 @@ public final class Task implements ITask {
         return completed;
     }
 
+    @Exclude
     public boolean isValid() {
         return !TextUtils.isEmpty(getTitle());
     }
 
-    public String getUser() {
-        return user;
-    }
 }
