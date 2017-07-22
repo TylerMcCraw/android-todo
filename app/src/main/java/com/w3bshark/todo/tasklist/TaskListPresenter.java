@@ -13,7 +13,10 @@ import com.w3bshark.todo.data.Task;
 import com.w3bshark.todo.data.source.ITasksDataSource;
 import com.w3bshark.todo.data.source.TasksRepository;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -28,10 +31,15 @@ import timber.log.Timber;
 
 final class TaskListPresenter implements ITaskListContract.Presenter, GoogleApiClient.OnConnectionFailedListener {
 
+    private static final String TAG = "com.w3bshark.todo.tasklist.TaskListPresenter";
+
     private final FirebaseAuth firebaseAuth;
     private final GoogleApiClient googleApiClient;
     private final ITasksDataSource tasksRepository;
     private final ITaskListContract.View view;
+
+    private Map<String, ITask> cachedTasks;
+    private List<String> taskKeys; // used to keep track of task order
 
     @Inject
     TaskListPresenter(FirebaseAuth firebaseAuth,
@@ -64,7 +72,7 @@ final class TaskListPresenter implements ITaskListContract.Presenter, GoogleApiC
         googleApiClient.registerConnectionFailedListener(this);
         googleApiClient.connect();
 
-        loadTasks(false);
+        loadTasks();
     }
 
     @Override
@@ -73,52 +81,81 @@ final class TaskListPresenter implements ITaskListContract.Presenter, GoogleApiC
         if (googleApiClient.isConnected()) {
             googleApiClient.disconnect();
         }
+
+        FirebaseUser firebaseUser = getUser();
+        if (firebaseUser == null) {
+            return;
+        }
     }
 
-    @Override
-    public void loadTasks(boolean forceUpdate) {
-        // TODO Simplification for sample: a network reload will be forced on first load.
-//        loadTasks(forceUpdate || firstLoad, true);
-//        firstLoad = false;
-        loadTasks(forceUpdate, true);
-    }
-
-    private void loadTasks(boolean forceUpdate, final boolean showLoadingUI) {
+    private void loadTasks() {
         FirebaseUser firebaseUser = getUser();
         if (firebaseUser == null) {
             return;
         }
 
-        if (showLoadingUI) {
-            view.setLoadingIndicator(true);
-        }
-        if (forceUpdate) {
-            tasksRepository.refreshTasks();
-        }
-
         String userId = firebaseUser.getUid();
-        tasksRepository.getTasks(userId, new ITasksDataSource.LoadTasksCallback() {
+        tasksRepository.listenForTasks(userId, new ITasksDataSource.LoadTasksCallback() {
             @Override
-            public void onTasksLoaded(List<? extends ITask> tasks) {
-                if (showLoadingUI) {
-                    view.setLoadingIndicator(false);
+            public void onTaskAdded(ITask task, String previousTaskKey) {
+                // If user is adding the first task, we must show the tasks view
+                if (getCachedTasks().size() == 0) {
+                    view.showTasksView();
                 }
 
-                if (tasks == null || tasks.isEmpty()) {
-                    view.showEmptyView();
+                int posPrevTask = getTaskKeys().indexOf(previousTaskKey);
+                posPrevTask = posPrevTask < 0 ? 0 : posPrevTask;
+                if (!getCachedTasks().containsKey(task.getId())) {
+                    if (previousTaskKey == null) {
+                        view.addTask(0, task);
+                        getTaskKeys().add(0, task.getId());
+                    } else {
+                        view.addTask(posPrevTask + 1, task);
+                        getTaskKeys().add(posPrevTask + 1, task.getId());
+                    }
                 } else {
-                    view.showTasks(tasks);
+                    if (previousTaskKey == null) {
+                        view.updateTask(0, task);
+                    } else {
+                        view.updateTask(posPrevTask + 1, task);
+                    }
                 }
+
+                getCachedTasks().put(task.getId(), task);
+            }
+
+            @Override
+            public void onTaskChanged(ITask task, String previousTaskKey) {
+                final int currentPosition = getTaskKeys().indexOf(task.getId());
+                getCachedTasks().put(task.getId(), task);
+                view.updateTask(currentPosition, task);
+            }
+
+            @Override
+            public void onTaskRemoved(ITask task) {
+                final int currentPosition = getTaskKeys().indexOf(task.getId());
+                view.removeTask(currentPosition, getCachedTasks().remove(task.getId()));
+                getTaskKeys().remove(task.getId());
+                // If user is removing the last task, we must show the empty view
+                if (getCachedTasks().size() == 0) {
+                    view.showEmptyView();
+                }
+            }
+
+            @Override
+            public void onTaskMoved(ITask task, String previousTaskKey) {
+                int newPosition = getTaskKeys().indexOf(previousTaskKey);
+                newPosition = newPosition < 0 ? 0 : newPosition;
+                getTaskKeys().remove(task.getId());
+                getTaskKeys().add(newPosition, task.getId());
+                view.moveTask(newPosition, task);
             }
 
             @Override
             public void onDataNotAvailable() {
-                if (showLoadingUI) {
-                    view.setLoadingIndicator(false);
-                }
                 view.showLoadingTasksError();
             }
-        });
+        }, TAG);
     }
 
     @Override
@@ -133,16 +170,22 @@ final class TaskListPresenter implements ITaskListContract.Presenter, GoogleApiC
 
     @Override
     public void completeTask(@NonNull ITask task) {
-        Task completedTask = new Task(task.getId(), task.getUser(), task.getTitle(), task.getDescription(), true);
-        tasksRepository.completeTask(completedTask);
-        loadTasks(false, false);
+        FirebaseUser user = getUser();
+        if (user == null) {
+            return;
+        }
+
+        tasksRepository.saveTask(user.getUid(), new Task(task.getId(), task.getTitle(), task.getDescription(), true));
     }
 
     @Override
     public void activateTask(@NonNull ITask task) {
-        Task activeTask = new Task(task.getId(), task.getUser(), task.getTitle(), task.getDescription(), false);
-        tasksRepository.activateTask(activeTask);
-        loadTasks(false, false);
+        FirebaseUser user = getUser();
+        if (user == null) {
+            return;
+        }
+
+        tasksRepository.saveTask(user.getUid(), new Task(task.getId(), task.getTitle(), task.getDescription(), false));
     }
 
     @Override
@@ -166,5 +209,19 @@ final class TaskListPresenter implements ITaskListContract.Presenter, GoogleApiC
             return null;
         }
         return firebaseUser;
+    }
+
+    private Map<String, ITask> getCachedTasks() {
+        if (cachedTasks == null) {
+            cachedTasks = new HashMap<>();
+        }
+        return cachedTasks;
+    }
+
+    private List<String> getTaskKeys() {
+        if (taskKeys == null) {
+            taskKeys = new ArrayList<>();
+        }
+        return taskKeys;
     }
 }

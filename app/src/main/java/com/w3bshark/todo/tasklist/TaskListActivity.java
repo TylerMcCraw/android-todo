@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,7 +23,6 @@ import com.w3bshark.todo.data.ITask;
 import com.w3bshark.todo.signin.SignInActivity;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -53,8 +50,6 @@ public class TaskListActivity extends AppCompatActivity implements ITaskListCont
     CoordinatorLayout rootView;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-    @BindView(R.id.swipe_refresh_layout)
-    SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.tasks_recyclerview)
     RecyclerView recyclerView;
     @BindView(R.id.empty_message)
@@ -76,13 +71,6 @@ public class TaskListActivity extends AppCompatActivity implements ITaskListCont
     }
 
     private void setUpRecyclerView() {
-        swipeRefreshLayout.setColorSchemeColors(
-                ContextCompat.getColor(this, R.color.colorPrimary),
-                ContextCompat.getColor(this, R.color.colorAccent),
-                ContextCompat.getColor(this, R.color.colorPrimaryDark)
-        );
-        swipeRefreshLayout.setOnRefreshListener(() -> presenter.loadTasks(true));
-
         adapter = new TaskListAdapter(new ArrayList<>(), this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
@@ -119,10 +107,6 @@ public class TaskListActivity extends AppCompatActivity implements ITaskListCont
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.sync:
-                swipeRefreshLayout.setRefreshing(true);
-                presenter.loadTasks(true);
-                return true;
             case R.id.sign_out_menu:
                 presenter.signOut();
                 return true;
@@ -139,11 +123,6 @@ public class TaskListActivity extends AppCompatActivity implements ITaskListCont
     @OnClick(R.id.fab)
     public void onFabClicked() {
         presenter.addNewTask();
-    }
-
-    @Override
-    public void setLoadingIndicator(final boolean active) {
-        swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(active));
     }
 
     @Override
@@ -168,12 +147,10 @@ public class TaskListActivity extends AppCompatActivity implements ITaskListCont
     }
 
     @Override
-    public void showTasks(List<? extends ITask> tasks) {
+    public void showTasksView() {
         setSyncMenuDrawable(false);
         emptyMessageTextView.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);
-        adapter.setTasks(tasks);
-        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -181,6 +158,26 @@ public class TaskListActivity extends AppCompatActivity implements ITaskListCont
         setSyncMenuDrawable(false);
         recyclerView.setVisibility(View.GONE);
         emptyMessageTextView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void addTask(int position, ITask task) {
+        adapter.addTask(position, task);
+    }
+
+    @Override
+    public void updateTask(int position, ITask task) {
+        adapter.updateTask(position, task);
+    }
+
+    @Override
+    public void removeTask(int position, ITask task) {
+        adapter.removeTask(position, task);
+    }
+
+    @Override
+    public void moveTask(int newPosition, ITask task) {
+        adapter.moveTask(newPosition, task);
     }
 
     @Override

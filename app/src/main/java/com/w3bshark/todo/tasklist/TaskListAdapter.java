@@ -23,7 +23,7 @@ import butterknife.ButterKnife;
 
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskViewHolder> {
 
-    private List<? extends ITask> tasks;
+    private List<ITask> tasks;
     private final TaskListListener listener;
 
     interface TaskListListener {
@@ -32,7 +32,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskVi
         void onActivateTaskClick(ITask task, View viewClicked);
     }
 
-    TaskListAdapter(List<? extends ITask> tasks, TaskListListener listener) {
+    TaskListAdapter(List<ITask> tasks, TaskListListener listener) {
         this.tasks = tasks;
         this.listener = listener;
     }
@@ -72,8 +72,24 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskVi
         return tasks.size();
     }
 
-    public void setTasks(List<? extends ITask> tasks) {
-        this.tasks = tasks;
+    void addTask(int position, ITask task) {
+        tasks.add(position, task);
+        notifyItemInserted(position);
+    }
+
+    void removeTask(int position, ITask task) {
+        tasks.remove(task);
+        notifyItemRemoved(position);
+    }
+
+    void updateTask(int position, ITask task) {
+        tasks.set(position, task);
+        notifyItemChanged(position);
+    }
+
+    void moveTask(int newPosition, ITask task) {
+        final int currentPosition = tasks.indexOf(task);
+        notifyItemMoved(currentPosition, newPosition);
     }
 
     static class TaskViewHolder extends RecyclerView.ViewHolder {

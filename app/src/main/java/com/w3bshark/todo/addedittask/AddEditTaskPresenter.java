@@ -81,7 +81,13 @@ final class AddEditTaskPresenter implements IAddEditTaskContract.Presenter, ITas
         if (isNewTask()) {
             throw new RuntimeException("loadTask() was called but task is new.");
         }
-        tasksRepository.getTask(taskId, this);
+
+        FirebaseUser user = getUser();
+        if (user == null) {
+            return;
+        }
+
+        tasksRepository.getTask(user.getUid(), taskId, this);
     }
 
     @Override
@@ -89,7 +95,13 @@ final class AddEditTaskPresenter implements IAddEditTaskContract.Presenter, ITas
         if (TextUtils.isEmpty(taskId)) {
             throw new RuntimeException("deleteTask() was called but task ID is null.");
         }
-        tasksRepository.deleteTask(taskId);
+
+        FirebaseUser user = getUser();
+        if (user == null) {
+            return;
+        }
+
+        tasksRepository.deleteTask(user.getUid(), taskId);
         view.goBackToTaskList();
     }
 
@@ -118,7 +130,7 @@ final class AddEditTaskPresenter implements IAddEditTaskContract.Presenter, ITas
         if (!newTask.isValid()) {
             view.showTaskError();
         } else {
-            tasksRepository.saveTask(newTask);
+            tasksRepository.createTask(user.getUid(), newTask);
             view.goBackToTaskList();
         }
     }
@@ -132,7 +144,7 @@ final class AddEditTaskPresenter implements IAddEditTaskContract.Presenter, ITas
         if (user == null) {
             return;
         }
-        tasksRepository.saveTask(new Task(taskId, user.getUid(), title, description, false));
+        tasksRepository.saveTask(user.getUid(), new Task(taskId, title, description, false));
         view.goBackToTaskList();
     }
 

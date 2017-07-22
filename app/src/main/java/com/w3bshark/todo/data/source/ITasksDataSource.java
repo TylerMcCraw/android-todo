@@ -1,12 +1,9 @@
 package com.w3bshark.todo.data.source;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.w3bshark.todo.data.ITask;
 import com.w3bshark.todo.data.Task;
-
-import java.util.List;
 
 /**
  * Created by Tyler McCraw on 5/26/17.
@@ -19,7 +16,13 @@ public interface ITasksDataSource {
 
     interface LoadTasksCallback {
 
-        void onTasksLoaded(List<? extends ITask> tasks);
+        void onTaskAdded(ITask task, String previousTaskKey);
+
+        void onTaskChanged(ITask task, String previousTaskKey);
+
+        void onTaskRemoved(ITask task);
+
+        void onTaskMoved(ITask task, String previousTaskKey);
 
         void onDataNotAvailable();
     }
@@ -31,31 +34,18 @@ public interface ITasksDataSource {
         void onDataNotAvailable();
     }
 
-    interface SaveTaskCallback {
+    void listenForTasks(@NonNull String userId, @NonNull LoadTasksCallback callback, @NonNull Object tag);
 
-        void onTaskSaved();
+    void getTask(@NonNull String userId, @NonNull String taskId, @NonNull LoadTaskCallback callback);
 
-        void onSaveTaskFailed();
-    }
+    void createTask(@NonNull String userId, Task newTask);
 
-    void getTasks(@NonNull String userId, @NonNull LoadTasksCallback callback);
-
-    void getTask(@NonNull String taskId, @NonNull LoadTaskCallback callback);
-
-    // TODO add callbacks for remainder of functions
-
-    void saveTask(@NonNull Task task);
-
-    void saveTasks(List<Task> tasks, @Nullable SaveTaskCallback callback);
-
-    void completeTask(@NonNull Task task);
-
-    void activateTask(@NonNull Task task);
+    void saveTask(@NonNull String userId, @NonNull Task task);
 
     void refreshTasks();
 
-    void deleteAllTasks(@NonNull String userId);
+    void deleteTask(@NonNull String userId, @NonNull String taskId);
 
-    void deleteTask(@NonNull String taskId);
+    void stopListeners(@NonNull String userId, @NonNull Object tag);
 
 }

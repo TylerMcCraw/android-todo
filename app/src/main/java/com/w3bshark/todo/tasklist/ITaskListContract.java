@@ -6,8 +6,6 @@ import com.w3bshark.todo.data.ITask;
 import com.w3bshark.todo.util.IBasePresenter;
 import com.w3bshark.todo.util.IBaseView;
 
-import java.util.List;
-
 /**
  * Created by Tyler McCraw on 5/26/17.
  * <p/>
@@ -18,11 +16,9 @@ public interface ITaskListContract {
 
     interface View extends IBaseView<Presenter> {
 
-        void setLoadingIndicator(boolean active);
-
         void goToSignInScreen();
 
-        void showTasks(List<? extends ITask> tasks);
+        void showTasksView();
 
         void goToAddTaskScreen();
 
@@ -31,11 +27,17 @@ public interface ITaskListContract {
         void showLoadingTasksError();
 
         void showEmptyView();
+
+        void addTask(int position, ITask task);
+
+        void updateTask(int position, ITask task);
+
+        void removeTask(int position, ITask task);
+
+        void moveTask(int newPosition, ITask task);
     }
 
     interface Presenter extends IBasePresenter {
-
-        void loadTasks(boolean forceUpdate);
 
         void addNewTask();
 
