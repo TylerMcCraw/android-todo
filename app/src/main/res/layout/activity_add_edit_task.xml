@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.w3bshark.todo.signin.SignInActivity">
+    tools:context="com.w3bshark.todo.addedittask.AddEditTaskActivity">
 
     <include layout="@layout/layout_app_bar"/>
 
